@@ -2,7 +2,8 @@
 
 import { EXERCISES, CATEGORIES, byId } from '../data/exercises.js';
 import { LADDERS } from '../data/plan.js';
-import { getLevels, setLevel, ladderSteps } from '../progression.js';
+import { getLevels, setLevel, ladderSteps, getProgress, removeSwap, targetFor } from '../progression.js';
+import { set } from '../storage.js';
 import { esc } from './util.js';
 import { createFigure, renderSVG } from './figure.js';
 
@@ -15,7 +16,7 @@ const videoUrl = (x) => `https://www.youtube.com/results?search_query=${encodeUR
 
 function exerciseRow(x, currentIds) {
   const meta = [
-    x.type === 'reps' && x.reps ? `${x.reps[0]}–${x.reps[1]} opak.${x.perSide ? ' / strana' : ''}` : 'na čas',
+    x.type === 'reps' && x.reps ? `${targetFor(x.id).join('–')} opak.${x.perSide ? ' / strana' : ''}` : 'na čas',
     x.hanging ? 'hrazda' : '',
     x.progressesTo ? `→ ${byId[x.progressesTo].name}` : '',
   ].filter(Boolean);
@@ -40,6 +41,23 @@ function exerciseRow(x, currentIds) {
         </div>
       </details>
     </li>`;
+}
+
+// Accepted progression changes that live outside the ladders (can be undone here).
+function adjustments() {
+  const { swaps, repBoost } = getProgress();
+  const rows = [
+    ...Object.entries(swaps)
+      .filter(([a, b]) => byId[a] && byId[b])
+      .map(([a, b]) => `<div class="adjust-row"><span>Kruhy: ${esc(byId[a].name)} → ${esc(byId[b].name)}</span><button class="btn" data-unswap="${a}">Zrušit</button></div>`),
+    ...Object.entries(repBoost)
+      .filter(([id, n]) => byId[id] && n > 0)
+      .map(([id]) => {
+        const [lo, hi] = targetFor(id);
+        return `<div class="adjust-row"><span>${esc(byId[id].name)}: cíl ${lo}–${hi}</span><button class="btn" data-unboost="${id}">Zrušit</button></div>`;
+      }),
+  ];
+  return rows.length ? `<div class="card"><h2>Úpravy z progrese</h2>${rows.join('')}</div>` : '';
 }
 
 export function renderLibrary(root) {
@@ -73,6 +91,8 @@ export function renderLibrary(root) {
           </div>
         </div>
       </div>
+
+      ${adjustments()}
 
       ${Object.entries(CATEGORIES)
         .map(([cat, label]) => {
@@ -108,6 +128,20 @@ export function renderLibrary(root) {
     }
   };
   root.onclick = (e) => {
+    const unswap = e.target.closest('[data-unswap]')?.dataset.unswap;
+    if (unswap) {
+      removeSwap(unswap);
+      renderLibrary(root);
+      return;
+    }
+    const unboost = e.target.closest('[data-unboost]')?.dataset.unboost;
+    if (unboost) {
+      const p = getProgress();
+      delete p.repBoost[unboost];
+      set('progress', p);
+      renderLibrary(root);
+      return;
+    }
     const core = e.target.closest('[data-core]')?.dataset.core;
     if (core) {
       setLevel('core', Number(core));

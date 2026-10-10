@@ -109,12 +109,16 @@ function openPlayer(session, restore) {
       finished = true; // may run synchronously inside startPlayer when restoring
       player = null;
       if (history.state?.player) history.back();
-      const entry = saveSession(session, result);
+      const entry = session.test ? null : saveSession(session, result);
       mount();
-      renderSummary(app, { ...result, saved: !!entry, streak: streaks().current }, () => {
-        previewDay = null;
-        if (location.hash !== '#dnes') location.hash = '#dnes';
-        else route();
+      renderSummary(app, { ...result, entry, test: session.test, streak: streaks().current }, {
+        settings: () => settings,
+        onSettingsPatch: (patch) => updateSettings({ ...settings, ...patch }),
+        onBack() {
+          previewDay = null;
+          if (location.hash !== '#dnes') location.hash = '#dnes';
+          else route();
+        },
       });
     },
   });

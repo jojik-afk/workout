@@ -110,7 +110,7 @@ export function loggedExercises(history = getHistory()) {
 
 // --- backup ---
 
-const KEYS = ['settings', 'levels', 'history', 'lastReps', 'photoPref'];
+const KEYS = ['settings', 'levels', 'progress', 'history', 'lastReps', 'photoPref'];
 
 export function exportData() {
   const data = {};

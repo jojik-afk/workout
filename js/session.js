@@ -2,7 +2,7 @@
 
 import { EXERCISES, byId } from './data/exercises.js';
 import { DAY_KEYS, DAY_NAMES, WEEK, FOCUS, WARMUP, HIIT, MOBILITY, SETS } from './data/plan.js';
-import { getLevels, ladderSteps } from './progression.js';
+import { getLevels, ladderSteps, getProgress, swapped, targetFor } from './progression.js';
 
 const EST_SET = 40; // estimated seconds per rep set, for duration estimates
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, Number(v) || lo));
@@ -45,7 +45,7 @@ export function strengthExercise(dayKey, levels, week) {
   return byId[levels[s.ladder]];
 }
 
-function candidates(category, levels, maxLevel) {
+function candidates(category, levels, maxLevel, swaps) {
   if (category === 'hanging') {
     // Current ladder step first, then one easier step, then side variations.
     const steps = ladderSteps('hanging');
@@ -56,13 +56,15 @@ function candidates(category, levels, maxLevel) {
   }
   const all = EXERCISES.filter((x) => x.category === category).sort((a, b) => a.level - b.level || a.id.localeCompare(b.id));
   const allowed = all.filter((x) => x.level <= maxLevel);
-  return allowed.length ? allowed : all.slice(0, 1);
+  const pool = allowed.length ? allowed : all.slice(0, 1);
+  // Accepted ab-circuit swaps replace an exercise with its harder version.
+  return [...new Map(pool.map((x) => byId[swapped(x.id, swaps)]).map((x) => [x.id, x])).values()];
 }
 
 // Deterministic rotation: each week shifts the pick within every category, so
 // the same circuit never repeats two weeks in a row. The day offset keeps
 // different days of the same week apart.
-export function buildCircuit(focusKey, levels, week, dayKey) {
+export function buildCircuit(focusKey, levels, week, dayKey, swaps = getProgress().swaps) {
   const focus = FOCUS[focusKey];
   const maxLevel = Math.min(levels.core, focus.maxLevel ?? 5);
   const dayOff = DAY_KEYS.indexOf(dayKey);
@@ -70,7 +72,7 @@ export function buildCircuit(focusKey, levels, week, dayKey) {
   const seen = {};
   const out = [];
   for (const cat of focus.slots) {
-    const pool = candidates(cat, levels, maxLevel);
+    const pool = candidates(cat, levels, maxLevel, swaps);
     const j = (seen[cat] = (seen[cat] ?? -1) + 1);
     let pick = null;
     if (cat === 'hanging' && j === 0) {
@@ -136,7 +138,7 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
   }
 
   if (strength) {
-    const target = strength.reps ?? [8, 12];
+    const target = targetFor(strength.id);
     phases.push({ kind: 'rest', duration: T.transition, block: 'strength', exercise: strength, set: [1, SETS] });
     for (let s = 1; s <= SETS; s++) {
       phases.push({ kind: 'reps', duration: null, block: 'strength', exercise: strength, set: [s, SETS], target });
@@ -183,6 +185,7 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
     subtitle: day.mobility ? `${day.title} + lehký core` : `${day.title} · ${focus.label}`,
     blocks,
     minutes: totalMin,
+    test: !!settings.testMode, // shortened test session: not saved to history
     phases,
   };
 }

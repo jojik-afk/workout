@@ -70,7 +70,7 @@ export function renderToday(root, { settings, active, previewDay, onPreview, onS
           .join('')}
       </div>
 
-      ${settings.testMode ? '<p class="note">Testovací režim je zapnutý – časy jsou zkrácené (Nastavení).</p>' : ''}
+      ${settings.testMode ? '<p class="note">Testovací režim je zapnutý – časy jsou zkrácené a trénink se neuloží do historie (Nastavení).</p>' : ''}
 
       <button class="btn btn-primary btn-start" data-act="start">Start · ~${session.minutes} min</button>
       <button class="btn btn-ghost" data-act="abs">Jen ${absOnly.blocks[0].label.toLowerCase()} · ~${absOnly.minutes} min</button>
