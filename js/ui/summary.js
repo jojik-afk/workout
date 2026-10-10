@@ -1,14 +1,11 @@
 // Summary screen after a workout. Feedback + progression come in milestone 4.
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+import { esc, plural } from './util.js';
 
 function fmtDuration(ms) {
   const s = Math.round(ms / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
-
-// Czech plural: 1 cvik, 2–4 cviky, 5+ cviků.
-const plural = (n, one, few, many) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
 
 export function renderSummary(root, result, onBack) {
   const sets = result.done.filter((d) => d.kind === 'reps');

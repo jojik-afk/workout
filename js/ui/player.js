@@ -104,6 +104,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
   let lastPaused = null;
   let repValue = 0;
   let ending = false;
+  let sideSwitched = true;
 
   const timer = new Timer(session.phases, { onPhase, onCountdown, onDone, onState: persist });
 
@@ -133,7 +134,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
 
   function onPhase(p, index, { caughtUp }) {
     el.dataset.kind = p.kind;
-    ui.phase.textContent = LABELS[p.kind];
+    ui.phase.textContent = p.label ?? LABELS[p.kind];
     ui.count.textContent = counterText(p);
     ui.nextLabel.hidden = !(p.kind === 'rest' || p.kind === 'prep');
     ui.name.textContent = p.exercise.name;
@@ -144,10 +145,12 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     ui.ring.hidden = isReps;
     ui.reps.hidden = !isReps;
     if (isReps) {
-      ui.target.textContent = `Cíl: ${p.target[0]}–${p.target[1]} opakování`;
+      const per = p.exercise.perSide ? ' na každou stranu' : '';
+      ui.target.textContent = `Cíl: ${p.target[0]}–${p.target[1]} opakování${per}`;
       setReps(prefill(p, index));
     }
     lastText = '';
+    sideSwitched = !p.exercise.switchSides;
     persist();
     if (!caughtUp) {
       audio.phaseStart(p.kind);
@@ -221,6 +224,15 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
 
     if (p.duration != null) {
       const rem = timer.remaining();
+      // Timed one-sided holds: cue the side switch halfway through.
+      if (!sideSwitched && !paused && rem <= p.duration / 2) {
+        sideSwitched = true;
+        if (p.duration / 2 - rem < 1) {
+          audio.phaseStart('work');
+          audio.vibratePhase('work');
+          audio.speak('Druhá strana');
+        }
+      }
       ui.ringFg.style.strokeDashoffset = RING_C * (1 - rem / p.duration);
       const txt = fmt(Math.ceil(rem));
       if (txt !== lastText) {

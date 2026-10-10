@@ -34,7 +34,9 @@ export const DEFAULT_SETTINGS = {
   voice: true,
   vibration: true,
   testMode: false,
-  sessionType: 'full',
+  work: 40,
+  rest: 20,
+  setRest: 75,
 };
 
 export function loadSettings() {
