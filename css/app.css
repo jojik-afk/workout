@@ -302,7 +302,7 @@ h2 {
 
 .player {
   --phase: var(--neutral);
-  --ring: min(78vw, 42dvh, 360px);
+  --ring: min(62vw, 31dvh, 320px);
   position: fixed;
   inset: 0;
   display: flex;
@@ -598,7 +598,7 @@ svg .fill {
 
 @media (max-height: 640px) {
   .player {
-    --ring: min(70vw, 36dvh);
+    --ring: min(56vw, 28dvh);
   }
   .p-cue {
     font-size: 15px;
@@ -906,4 +906,179 @@ select {
 .mini-stepper .btn {
   padding: 0;
   font-size: 22px;
+}
+
+/* ---------- milestone 2b: stick figure ---------- */
+
+.figure {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--accent);
+}
+
+.fig,
+.figure-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.figure-photo {
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.fig path,
+.fig circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fig .fig-body circle {
+  fill: currentColor;
+  stroke-width: 0;
+}
+
+.fig .fig-far {
+  opacity: 0.42;
+}
+
+.fig .fig-glow {
+  stroke-width: 18;
+  opacity: 0.3;
+  filter: blur(3px);
+}
+
+.fig .prop-floor,
+.fig .prop-bar,
+.fig .prop-wall {
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+.fig .prop-bar {
+  stroke-width: 4;
+  opacity: 0.8;
+}
+
+.fig .prop-box {
+  fill: var(--surface-2);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  opacity: 0.8;
+}
+
+.figure-toggle,
+.figure-play {
+  position: absolute;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  color: var(--text);
+  font-weight: 650;
+  font-size: 13px;
+}
+
+.figure-toggle {
+  top: 4px;
+  right: 4px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+
+.figure-play {
+  inset: 50% auto auto 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.figure-play svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+/* figure placement */
+
+.p-main {
+  gap: 10px;
+}
+
+.p-figure {
+  flex: 1 1 0;
+  min-height: 72px;
+  max-height: 240px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.player .figure {
+  color: var(--phase);
+}
+
+.ex details > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.ex details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ex-thumb {
+  width: 76px;
+  height: 58px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--neutral);
+  overflow: hidden;
+}
+
+.ex-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ex-text > span {
+  display: block;
+}
+
+.ex details[open] .ex-thumb {
+  color: var(--accent);
+}
+
+.ex-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ex-figure {
+  height: 200px;
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 8px;
+}
+
+.ex-video {
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  min-height: 44px;
 }

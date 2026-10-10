@@ -5,6 +5,7 @@ import * as audio from '../audio.js';
 import * as wakeLock from '../wakelock.js';
 import { get, set, remove } from '../storage.js';
 import { confirmDialog } from './dialog.js';
+import { createFigure } from './figure.js';
 
 const LABELS = { prep: 'Připrav se', warmup: 'Rozcvička', work: 'Cvičení', rest: 'Odpočinek', reps: 'Série' };
 const RING_C = 2 * Math.PI * 92;
@@ -46,6 +47,7 @@ const TEMPLATE = `
       </div>
       <button class="btn btn-primary btn-big" data-act="done">Hotovo</button>
     </div>
+    <div class="p-figure"></div>
     <div class="p-info">
       <div class="p-next-label" hidden>Další:</div>
       <h1 class="p-name"></h1>
@@ -96,6 +98,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     pauseBtn: $('[data-act="pause"]'),
   };
   ui.ringFg.style.strokeDasharray = RING_C;
+  const figure = createFigure($('.p-figure'));
   ui.safety.textContent = HANGING_NOTE;
 
   let stopped = false;
@@ -138,6 +141,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     ui.count.textContent = counterText(p);
     ui.nextLabel.hidden = !(p.kind === 'rest' || p.kind === 'prep');
     ui.name.textContent = p.exercise.name;
+    figure.setExercise(p.exercise.id);
     ui.cue.textContent = p.exercise.czCue;
     ui.safety.hidden = !p.exercise.hanging;
 
@@ -218,6 +222,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     if (paused !== lastPaused) {
       lastPaused = paused;
       el.classList.toggle('is-paused', paused);
+      figure.setPlaying(!paused);
       ui.pauseBtn.innerHTML = paused ? ICON.play : ICON.pause;
       ui.pauseBtn.setAttribute('aria-label', paused ? 'Pokračovat' : 'Pauza');
     }
@@ -282,6 +287,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     clearInterval(interval);
     document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('pagehide', persist);
+    figure.destroy();
     wakeLock.release();
   }
 

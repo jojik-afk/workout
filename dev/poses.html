@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Pose preview</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../css/app.css">
+  <style>
+    body { padding: 16px; }
+    header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+    header h1 { font-size: 22px; margin-right: auto; }
+    header input[type=search] { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+    .cell { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px; }
+    .cell h2 { font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+    .cell h2 small { color: var(--muted); font-weight: 500; font-size: 12px; }
+    .cell .figure { height: 210px; margin: 6px 0; }
+    .strip { display: flex; gap: 4px; }
+    .strip svg { flex: 1; min-width: 0; height: 110px; color: var(--neutral); background: var(--bg); border-radius: 6px; }
+    .missing { color: var(--danger); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pose preview</h1>
+    <input type="search" id="q" placeholder="Filtr (id, název, kategorie)">
+    <label class="toggle"><span>Pauza</span><input type="checkbox" id="pause"><span class="switch"></span></label>
+  </header>
+  <p class="muted small">Pózy se upravují v <code>js/data/poses.js</code>, stačí obnovit stránku. Pruh dole ukazuje jednotlivé keyframy.</p>
+  <div class="grid" id="grid"></div>
+  <script type="module">
+    import { EXERCISES } from '../js/data/exercises.js';
+    import { POSES } from '../js/data/poses.js';
+    import { createFigure, renderSVG, frameCount, framePhase } from '../js/ui/figure.js';
+
+    const grid = document.getElementById('grid');
+    const figures = [];
+    for (const x of EXERCISES) {
+      const cell = document.createElement('section');
+      cell.className = 'cell';
+      cell.dataset.search = `${x.id} ${x.name} ${x.category}`.toLowerCase();
+      cell.innerHTML = `<h2><span>${x.name}</span><small>${x.id} · ${x.category}</small></h2>`;
+      grid.append(cell);
+      if (!POSES[x.id]) {
+        cell.insertAdjacentHTML('beforeend', '<p class="missing">Chybí póza</p>');
+        continue;
+      }
+      figures.push(createFigure(cell, { id: x.id, controls: true }));
+      const strip = document.createElement('div');
+      strip.className = 'strip';
+      for (let i = 0; i < frameCount(x.id); i++) strip.append(renderSVG(x.id, framePhase(x.id, i)));
+      cell.append(strip);
+    }
+    const missing = EXERCISES.filter((x) => !POSES[x.id]).length;
+    document.querySelector('h1').textContent = `Pose preview · ${EXERCISES.length} cviků${missing ? ` · ${missing} bez pózy` : ''}`;
+
+    document.getElementById('q').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      for (const c of grid.children) c.hidden = q && !c.dataset.search.includes(q);
+    });
+    document.getElementById('pause').addEventListener('change', (e) => {
+      for (const f of figures) f.setPlaying(!e.target.checked);
+    });
+  </script>
+</body>
+</html>

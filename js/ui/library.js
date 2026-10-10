@@ -4,11 +4,14 @@ import { EXERCISES, CATEGORIES, byId } from '../data/exercises.js';
 import { LADDERS } from '../data/plan.js';
 import { getLevels, setLevel, ladderSteps } from '../progression.js';
 import { esc } from './util.js';
+import { createFigure, renderSVG } from './figure.js';
 
 const dots = (level) =>
   `<span class="dots" aria-label="Úroveň ${level} z 5">${[1, 2, 3, 4, 5]
     .map((i) => `<i class="${i <= level ? 'on' : ''}"></i>`)
     .join('')}</span>`;
+
+const videoUrl = (x) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${x.name} exercise`)}`;
 
 function exerciseRow(x, currentIds) {
   const meta = [
@@ -18,12 +21,24 @@ function exerciseRow(x, currentIds) {
   ].filter(Boolean);
   return `
     <li class="ex ${currentIds.has(x.id) ? 'is-current' : ''}">
-      <div class="ex-head">
-        <span class="ex-name">${esc(x.name)}</span>
-        ${dots(x.level)}
-      </div>
-      <p class="ex-cue">${esc(x.czCue)}</p>
-      <p class="ex-meta">${meta.map(esc).join(' · ')}</p>
+      <details data-id="${x.id}">
+        <summary>
+          <span class="ex-thumb" data-thumb="${x.id}"></span>
+          <span class="ex-text">
+            <span class="ex-head">
+              <span class="ex-name">${esc(x.name)}</span>
+              ${dots(x.level)}
+            </span>
+            <span class="ex-cue">${esc(x.czCue)}</span>
+            <span class="ex-meta">${meta.map(esc).join(' · ')}</span>
+          </span>
+        </summary>
+        <div class="ex-demo">
+          <div class="ex-figure"></div>
+          ${x.hanging ? '<p class="p-safety">Na hrazdě: přestaň, jakmile ti začne povolovat úchop. Nikdy se nepouštěj nekontrolovaně.</p>' : ''}
+          <a class="btn btn-ghost ex-video" href="${videoUrl(x)}" target="_blank" rel="noopener">Video na YouTube ↗</a>
+        </div>
+      </details>
     </li>`;
 }
 
@@ -70,6 +85,20 @@ export function renderLibrary(root) {
         })
         .join('')}
     </div>`;
+
+  for (const t of root.querySelectorAll('[data-thumb]')) t.append(renderSVG(t.dataset.thumb, 0, { glow: false }));
+
+  // Live animation only while a row is expanded.
+  const live = new Map();
+  for (const d of root.querySelectorAll('details[data-id]')) {
+    d.addEventListener('toggle', () => {
+      if (d.open && !live.has(d)) live.set(d, createFigure(d.querySelector('.ex-figure'), { id: d.dataset.id }));
+      else if (!d.open && live.has(d)) {
+        live.get(d).destroy();
+        live.delete(d);
+      }
+    });
+  }
 
   root.onchange = (e) => {
     const ladder = e.target.dataset.ladder;
