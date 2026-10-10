@@ -143,8 +143,16 @@ export class Timer {
       kind: 'reps',
       reps,
       set: p.set,
+      target: p.target,
     };
     this._goto(this.index + 1, this.clock());
+  }
+
+  // Optional rep count for an already finished timed exercise (e.g. hanging raises).
+  logReps(index, reps) {
+    if (!this.done[index]) return false;
+    this.done[index].reps = reps;
+    return true;
   }
 
   finish(early = false) {

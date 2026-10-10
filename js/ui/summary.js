@@ -30,6 +30,12 @@ export function renderSummary(root, result, onBack) {
           : ''
       }
 
+      ${
+        result.saved
+          ? `<p class="muted small center">Uloženo do historie${result.streak ? ` · streak ${result.streak} ${plural(result.streak, 'den', 'dny', 'dní')} 🔥` : ''}</p>`
+          : '<p class="muted small center">Nic nebylo odcvičeno, do historie se neukládá.</p>'
+      }
+
       <button class="btn btn-primary btn-start" data-act="back">Zpět</button>
     </div>`;
 

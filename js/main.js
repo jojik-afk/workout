@@ -6,6 +6,7 @@ import { renderLibrary } from './ui/library.js';
 import { renderSettings } from './ui/settings.js';
 import { startPlayer } from './ui/player.js';
 import { renderSummary } from './ui/summary.js';
+import { saveSession, streaks } from './records.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -108,8 +109,9 @@ function openPlayer(session, restore) {
       finished = true; // may run synchronously inside startPlayer when restoring
       player = null;
       if (history.state?.player) history.back();
+      const entry = saveSession(session, result);
       mount();
-      renderSummary(app, result, () => {
+      renderSummary(app, { ...result, saved: !!entry, streak: streaks().current }, () => {
         previewDay = null;
         if (location.hash !== '#dnes') location.hash = '#dnes';
         else route();

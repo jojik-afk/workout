@@ -2,7 +2,8 @@
 
 import { buildSession, dayKeyOf } from '../session.js';
 import { WEEK_ORDER, DAY_SHORT, DAY_NAMES } from '../data/plan.js';
-import { esc } from './util.js';
+import { esc, plural } from './util.js';
+import { streaks } from '../records.js';
 
 // Date of the given weekday in the current Mon–Sun week.
 function dateForDay(key, today = new Date()) {
@@ -19,12 +20,20 @@ export function renderToday(root, { settings, active, previewDay, onPreview, onS
   const session = buildSession(date, settings);
   const absOnly = buildSession(date, settings, { absOnly: true });
   const isToday = key === todayKey;
+  const s = streaks();
 
   root.innerHTML = `
     <div class="screen">
       <p class="eyebrow">${isToday ? 'Dnes' : 'Náhled'}</p>
       <h1 class="title">${DAY_NAMES[key]}</h1>
       <p class="subtitle">${esc(session.subtitle)}</p>
+
+      <div class="streak ${s.doneToday ? 'is-done' : ''}">
+        <span class="streak-num">${s.current}</span>
+        <span>${s.current ? `${plural(s.current, 'den', 'dny', 'dní')} v řadě` : 'Začni streak ještě dnes'}${
+          s.doneToday ? ' · dnes hotovo ✓' : s.current ? ' · dnes ještě ne' : ''
+        }</span>
+      </div>
 
       <div class="day-chips" role="tablist">
         ${WEEK_ORDER.map(

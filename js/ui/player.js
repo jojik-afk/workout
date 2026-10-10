@@ -48,6 +48,15 @@ const TEMPLATE = `
       <button class="btn btn-primary btn-big" data-act="done">Hotovo</button>
     </div>
     <div class="p-figure"></div>
+    <div class="p-log" data-act="noop" hidden>
+      <span class="p-log-label"></span>
+      <div class="p-log-ctrl">
+        <button class="log-btn" data-act="log-minus" aria-label="Méně">−</button>
+        <output class="p-log-val">0</output>
+        <button class="log-btn" data-act="log-plus" aria-label="Více">+</button>
+        <button class="log-btn log-ok" data-act="log-ok" aria-label="Zapsat">✓</button>
+      </div>
+    </div>
     <div class="p-info">
       <div class="p-next-label" hidden>Další:</div>
       <h1 class="p-name"></h1>
@@ -96,6 +105,9 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     cue: $('.p-cue'),
     safety: $('.p-safety'),
     pauseBtn: $('[data-act="pause"]'),
+    log: $('.p-log'),
+    logLabel: $('.p-log-label'),
+    logVal: $('.p-log-val'),
   };
   ui.ringFg.style.strokeDasharray = RING_C;
   const figure = createFigure($('.p-figure'));
@@ -108,6 +120,8 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
   let repValue = 0;
   let ending = false;
   let sideSwitched = true;
+  let logIndex = -1; // finished hanging exercise whose reps can be logged during this rest
+  let logValue = 0;
 
   const timer = new Timer(session.phases, { onPhase, onCountdown, onDone, onState: persist });
 
@@ -145,6 +159,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     ui.cue.textContent = p.exercise.czCue;
     ui.safety.hidden = !p.exercise.hanging;
 
+    setupLog(p, index);
     const isReps = p.kind === 'reps';
     ui.ring.hidden = isReps;
     ui.reps.hidden = !isReps;
@@ -174,6 +189,33 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     audio.vibrateEnd();
     if (!result.early) audio.speak('Hotovo. Skvělá práce!');
     onFinish({ ...result, title: session.title });
+  }
+
+  function setupLog(p, index) {
+    const prev = session.phases[index - 1];
+    const done = timer.done[index - 1];
+    logIndex = p.kind === 'rest' && prev?.kind === 'work' && prev.exercise.hanging && done ? index - 1 : -1;
+    ui.log.hidden = logIndex < 0;
+    if (logIndex < 0) return;
+    const last = get('lastReps', {})?.[prev.exercise.id];
+    logValue = done.reps ?? (Number.isFinite(last) ? last : 8);
+    ui.logLabel.textContent = `${prev.exercise.name}: kolik opakování?`;
+    ui.logVal.textContent = logValue;
+    ui.log.classList.toggle('is-logged', done.reps != null);
+  }
+
+  function logReps(delta) {
+    if (logIndex < 0) return;
+    logValue = Math.max(0, Math.min(99, logValue + delta));
+    ui.logVal.textContent = logValue;
+    if (timer.logReps(logIndex, logValue)) {
+      const id = session.phases[logIndex].exercise.id;
+      const last = get('lastReps', {}) || {};
+      last[id] = logValue;
+      set('lastReps', last);
+      ui.log.classList.add('is-logged');
+      persist();
+    }
   }
 
   function setReps(v) {
@@ -277,6 +319,9 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
       case 'minus': setReps(repValue - 1); break;
       case 'plus': setReps(repValue + 1); break;
       case 'done': completeReps(); break;
+      case 'log-minus': logReps(-1); break;
+      case 'log-plus': logReps(1); break;
+      case 'log-ok': logReps(0); break;
       case 'tap': if (timer.phase?.kind !== 'reps') togglePause(); break;
     }
   }
