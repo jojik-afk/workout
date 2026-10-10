@@ -7,6 +7,7 @@ import { renderSettings } from './ui/settings.js';
 import { startPlayer } from './ui/player.js';
 import { renderSummary } from './ui/summary.js';
 import { saveSession, streaks } from './records.js';
+import { registerSW } from './pwa.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -136,3 +137,4 @@ window.addEventListener('popstate', () => {
 });
 
 route();
+registerSW({ isBusy: () => !!player });

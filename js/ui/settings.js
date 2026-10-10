@@ -4,6 +4,7 @@ import * as audio from '../audio.js';
 import { exportData, validateBackup, importData, resetData, getHistory, dateKey } from '../records.js';
 import { confirmDialog } from './dialog.js';
 import { plural } from './util.js';
+import { canInstall, promptInstall, onInstallChange, isStandalone } from '../pwa.js';
 
 const STEPPERS = [
   { key: 'work', label: 'Práce v kruhu', min: 30, max: 50, step: 5, unit: 's' },
@@ -54,6 +55,16 @@ export function renderSettings(root, { settings, onChange }) {
       </div>
 
       <div class="card">
+        <h2>Aplikace</h2>
+        ${
+          isStandalone()
+            ? '<p class="muted small">Běží jako nainstalovaná aplikace a funguje i offline.</p>'
+            : `<button class="btn btn-primary" data-act="install" ${canInstall() ? '' : 'hidden'}>Nainstalovat na plochu</button>
+               <p class="muted small install-hint" ${canInstall() ? 'hidden' : ''}>Instalace: v Chromu menu ⋮ → <b>Přidat na plochu</b> / <b>Nainstalovat aplikaci</b>.</p>`
+        }
+      </div>
+
+      <div class="card">
         <h2>Data</h2>
         <p class="muted small">Všechno je uložené jen v tomhle telefonu. Zálohu si občas stáhni (${getHistory().length} ${plural(getHistory().length, 'trénink', 'tréninky', 'tréninků')} v historii).</p>
         <button class="btn" data-act="export">Stáhnout zálohu (JSON)</button>
@@ -74,6 +85,10 @@ export function renderSettings(root, { settings, onChange }) {
       if (s.key === 'work' && value + settings.rest > 60) patch.rest = Math.max(10, 60 - value);
       if (s.key === 'rest' && settings.work + value > 60) value = patch.rest = Math.max(10, 60 - settings.work);
       onChange({ ...settings, ...patch });
+      return;
+    }
+    if (e.target.closest('[data-act="install"]')) {
+      promptInstall();
       return;
     }
     if (e.target.closest('[data-act="export"]')) {
@@ -102,6 +117,12 @@ export function renderSettings(root, { settings, onChange }) {
       audio.speak('Další: Hanging knee raises');
     }
   };
+  const stop = onInstallChange((available) => {
+    if (!root.isConnected) return stop();
+    root.querySelector('[data-act="install"]')?.toggleAttribute('hidden', !available);
+    root.querySelector('.install-hint')?.toggleAttribute('hidden', available);
+  });
+
   root.onchange = (e) => {
     if (e.target.dataset.act === 'import') {
       const file = e.target.files?.[0];
