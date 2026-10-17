@@ -364,7 +364,7 @@ export function createFigure(container, { id = null, controls = true } = {}) {
   wrap.className = 'figure';
   wrap.innerHTML = `
     <img class="figure-photo" alt="" hidden>
-    <button class="figure-play" type="button" hidden aria-label="Přehrát animaci">
+    <button class="figure-play" type="button" hidden aria-label="Play animation">
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
     <button class="figure-toggle" type="button" hidden>Foto</button>`;
@@ -406,7 +406,7 @@ export function createFigure(container, { id = null, controls = true } = {}) {
   function sync() {
     const hasPhoto = !!(curId && PHOTOS[curId]);
     toggle.hidden = !controls || !hasPhoto;
-    toggle.textContent = showPhoto && hasPhoto ? 'Animace' : 'Foto';
+    toggle.textContent = showPhoto && hasPhoto ? 'Animation' : 'Photo';
     const photoMode = showPhoto && hasPhoto;
     img.hidden = !photoMode;
     if (svg) svg.style.display = photoMode ? 'none' : '';

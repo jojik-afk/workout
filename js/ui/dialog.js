@@ -1,6 +1,6 @@
 // In-app confirm dialog (native confirm() would block the timer loop).
 
-export function confirmDialog({ title, text = '', okText = 'OK', cancelText = 'Zrušit' }) {
+export function confirmDialog({ title, text = '', okText = 'OK', cancelText = 'Cancel' }) {
   return new Promise((resolve) => {
     const backdrop = document.createElement('div');
     backdrop.className = 'dialog-backdrop';

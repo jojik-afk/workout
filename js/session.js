@@ -129,12 +129,12 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
 
   if (!absOnly && day.mobility) {
     const list = MOBILITY.map((id) => byId[id]);
-    timedList(list, { block: 'mobility', kind: 'warmup', work: T.mob, rest: T.mobRest, label: 'Protažení' });
-    endBlock('mobility', 'Mobilita', `${list.length} cviků · ${T.mob} s`, list.map((x) => x.name));
+    timedList(list, { block: 'mobility', kind: 'warmup', work: T.mob, rest: T.mobRest, label: 'Stretch' });
+    endBlock('mobility', 'Mobility', `${list.length} exercises · ${T.mob} s`, list.map((x) => x.name));
   } else if (!absOnly) {
     const list = WARMUP.map((id) => byId[id]);
     timedList(list, { block: 'warmup', kind: 'warmup', work: T.warm, rest: 0 });
-    endBlock('warmup', 'Rozcvička', `${list.length} cviky · ${T.warm} s`, list.map((x) => x.name));
+    endBlock('warmup', 'Warm-up', `${list.length} exercises · ${T.warm} s`, list.map((x) => x.name));
   }
 
   if (strength) {
@@ -146,13 +146,13 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
         phases.push({ kind: 'rest', duration: T.setRest, block: 'strength', exercise: strength, set: [s + 1, SETS] });
       }
     }
-    const per = strength.perSide ? ' / strana' : '';
-    endBlock('strength', 'Síla', `${strength.name} · ${SETS} × ${target[0]}–${target[1]}${per}`, []);
+    const per = strength.perSide ? ' / side' : '';
+    endBlock('strength', 'Strength', `${strength.name} · ${SETS} × ${target[0]}–${target[1]}${per}`, []);
   } else if (!absOnly && day.hiit) {
     const list = HIIT.map((id) => byId[id]);
     phases.push({ kind: 'rest', duration: T.transition, block: 'hiit', exercise: list[0], counter: [1, list.length] });
     timedList(list, { block: 'hiit', work: T.hiitWork, rest: T.hiitRest, label: 'HIIT' });
-    endBlock('hiit', 'Full-body HIIT', `${list.length} cviků · ${T.hiitWork}/${T.hiitRest}`, list.map((x) => x.name));
+    endBlock('hiit', 'Full-body HIIT', `${list.length} exercises · ${T.hiitWork}/${T.hiitRest}`, list.map((x) => x.name));
   }
 
   // Ab circuit
@@ -168,13 +168,13 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
       if (i < n - 1) {
         phases.push({ kind: 'rest', duration: rest, block: 'abs', exercise: circuit[i + 1], counter: [i + 2, n], round: [r, rounds] });
       } else if (r < rounds) {
-        phases.push({ kind: 'rest', duration: T.roundRest, block: 'abs', exercise: circuit[0], counter: [1, n], round: [r + 1, rounds], label: 'Pauza mezi koly' });
+        phases.push({ kind: 'rest', duration: T.roundRest, block: 'abs', exercise: circuit[0], counter: [1, n], round: [r + 1, rounds], label: 'Rest between rounds' });
       }
     });
   }
-  const roundsText = rounds > 1 ? ` · ${rounds} kola` : '';
+  const roundsText = rounds > 1 ? ` · ${rounds} rounds` : '';
   const absDetail = `${n} × ${work}/${rest}${roundsText}`;
-  endBlock('abs', light ? 'Lehký core' : 'Břicho', light ? absDetail : `${focus.label} · ${absDetail}`, circuit.map((x) => x.name));
+  endBlock('abs', light ? 'Light core' : 'Abs', light ? absDetail : `${focus.label} · ${absDetail}`, circuit.map((x) => x.name));
 
   const totalMin = blocks.reduce((s, b) => s + b.minutes, 0);
   return {
@@ -182,7 +182,7 @@ export function buildSession(date, settings, { absOnly = false } = {}) {
     dayKey,
     date: date.toISOString(),
     title: absOnly ? `${DAY_NAMES[dayKey]} · ${focus.label}` : `${DAY_NAMES[dayKey]} · ${day.title}`,
-    subtitle: day.mobility ? `${day.title} + lehký core` : `${day.title} · ${focus.label}`,
+    subtitle: day.mobility ? `${day.title} + light core` : `${day.title} · ${focus.label}`,
     blocks,
     minutes: totalMin,
     test: !!settings.testMode, // shortened test session: not saved to history

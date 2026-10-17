@@ -123,11 +123,11 @@ export function exportData() {
 
 // Validates a parsed backup; returns a human-readable error or null.
 export function validateBackup(obj) {
-  if (!obj || typeof obj !== 'object') return 'Soubor neobsahuje platná data.';
-  if (obj.app !== APP_ID) return 'Tohle není záloha z Core Daily.';
-  if (typeof obj.version !== 'number' || obj.version > SCHEMA_VERSION) return 'Záloha je z novější verze aplikace.';
-  if (!obj.data || typeof obj.data !== 'object') return 'Záloha neobsahuje data.';
-  if (obj.data.history != null && !Array.isArray(obj.data.history)) return 'Historie v záloze je poškozená.';
+  if (!obj || typeof obj !== 'object') return 'The file does not contain valid data.';
+  if (obj.app !== APP_ID) return 'This is not a Core Daily backup.';
+  if (typeof obj.version !== 'number' || obj.version > SCHEMA_VERSION) return 'The backup is from a newer version of the app.';
+  if (!obj.data || typeof obj.data !== 'object') return 'The backup contains no data.';
+  if (obj.data.history != null && !Array.isArray(obj.data.history)) return 'The history in the backup is corrupted.';
   return null;
 }
 

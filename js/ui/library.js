@@ -8,7 +8,7 @@ import { esc } from './util.js';
 import { createFigure, renderSVG } from './figure.js';
 
 const dots = (level) =>
-  `<span class="dots" aria-label="Úroveň ${level} z 5">${[1, 2, 3, 4, 5]
+  `<span class="dots" aria-label="Level ${level} of 5">${[1, 2, 3, 4, 5]
     .map((i) => `<i class="${i <= level ? 'on' : ''}"></i>`)
     .join('')}</span>`;
 
@@ -16,8 +16,8 @@ const videoUrl = (x) => `https://www.youtube.com/results?search_query=${encodeUR
 
 function exerciseRow(x, currentIds) {
   const meta = [
-    x.type === 'reps' && x.reps ? `${targetFor(x.id).join('–')} opak.${x.perSide ? ' / strana' : ''}` : 'na čas',
-    x.hanging ? 'hrazda' : '',
+    x.type === 'reps' && x.reps ? `${targetFor(x.id).join('–')} reps${x.perSide ? ' / side' : ''}` : 'timed',
+    x.hanging ? 'bar' : '',
     x.progressesTo ? `→ ${byId[x.progressesTo].name}` : '',
   ].filter(Boolean);
   return `
@@ -30,14 +30,14 @@ function exerciseRow(x, currentIds) {
               <span class="ex-name">${esc(x.name)}</span>
               ${dots(x.level)}
             </span>
-            <span class="ex-cue">${esc(x.czCue)}</span>
+            <span class="ex-cue">${esc(x.cue)}</span>
             <span class="ex-meta">${meta.map(esc).join(' · ')}</span>
           </span>
         </summary>
         <div class="ex-demo">
           <div class="ex-figure"></div>
-          ${x.hanging ? '<p class="p-safety">Na hrazdě: přestaň, jakmile ti začne povolovat úchop. Nikdy se nepouštěj nekontrolovaně.</p>' : ''}
-          <a class="btn btn-ghost ex-video" href="${videoUrl(x)}" target="_blank" rel="noopener">Video na YouTube ↗</a>
+          ${x.hanging ? '<p class="p-safety">On the bar: stop as soon as your grip starts to fail. Never let go uncontrolled.</p>' : ''}
+          <a class="btn btn-ghost ex-video" href="${videoUrl(x)}" target="_blank" rel="noopener">Video on YouTube ↗</a>
         </div>
       </details>
     </li>`;
@@ -49,15 +49,15 @@ function adjustments() {
   const rows = [
     ...Object.entries(swaps)
       .filter(([a, b]) => byId[a] && byId[b])
-      .map(([a, b]) => `<div class="adjust-row"><span>Kruhy: ${esc(byId[a].name)} → ${esc(byId[b].name)}</span><button class="btn" data-unswap="${a}">Zrušit</button></div>`),
+      .map(([a, b]) => `<div class="adjust-row"><span>Circuits: ${esc(byId[a].name)} → ${esc(byId[b].name)}</span><button class="btn" data-unswap="${a}">Undo</button></div>`),
     ...Object.entries(repBoost)
       .filter(([id, n]) => byId[id] && n > 0)
       .map(([id]) => {
         const [lo, hi] = targetFor(id);
-        return `<div class="adjust-row"><span>${esc(byId[id].name)}: cíl ${lo}–${hi}</span><button class="btn" data-unboost="${id}">Zrušit</button></div>`;
+        return `<div class="adjust-row"><span>${esc(byId[id].name)}: target ${lo}–${hi}</span><button class="btn" data-unboost="${id}">Undo</button></div>`;
       }),
   ];
-  return rows.length ? `<div class="card"><h2>Úpravy z progrese</h2>${rows.join('')}</div>` : '';
+  return rows.length ? `<div class="card"><h2>Progression adjustments</h2>${rows.join('')}</div>` : '';
 }
 
 export function renderLibrary(root) {
@@ -66,11 +66,11 @@ export function renderLibrary(root) {
 
   root.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">Cviky</p>
-      <h1 class="title">Knihovna</h1>
+      <p class="eyebrow">Exercises</p>
+      <h1 class="title">Library</h1>
 
       <div class="card">
-        <h2>Moje úrovně</h2>
+        <h2>My levels</h2>
         ${Object.entries(LADDERS)
           .map(
             ([key, ladder]) => `
@@ -78,14 +78,14 @@ export function renderLibrary(root) {
             <span>${esc(ladder.name)}</span>
             <select data-ladder="${key}">
               ${ladderSteps(key)
-                .map((id) => `<option value="${id}" ${levels[key] === id ? 'selected' : ''}>${esc(byId[id].name)} (úr. ${byId[id].level})</option>`)
+                .map((id) => `<option value="${id}" ${levels[key] === id ? 'selected' : ''}>${esc(byId[id].name)} (lvl ${byId[id].level})</option>`)
                 .join('')}
             </select>
           </label>`,
           )
           .join('')}
         <div class="field">
-          <span>Kruhy na břicho – cviky do úrovně</span>
+          <span>Ab circuits – exercises up to level</span>
           <div class="segmented seg-5" role="radiogroup">
             ${[1, 2, 3, 4, 5].map((n) => `<button role="radio" data-core="${n}" aria-checked="${levels.core === n}">${n}</button>`).join('')}
           </div>

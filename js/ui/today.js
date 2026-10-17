@@ -24,14 +24,14 @@ export function renderToday(root, { settings, active, previewDay, onPreview, onS
 
   root.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">${isToday ? 'Dnes' : 'Náhled'}</p>
+      <p class="eyebrow">${isToday ? 'Today' : 'Preview'}</p>
       <h1 class="title">${DAY_NAMES[key]}</h1>
       <p class="subtitle">${esc(session.subtitle)}</p>
 
       <div class="streak ${s.doneToday ? 'is-done' : ''}">
         <span class="streak-num">${s.current}</span>
-        <span>${s.current ? `${plural(s.current, 'den', 'dny', 'dní')} v řadě` : 'Začni streak ještě dnes'}${
-          s.doneToday ? ' · dnes hotovo ✓' : s.current ? ' · dnes ještě ne' : ''
+        <span>${s.current ? `${plural(s.current, 'day', 'days')} in a row` : 'Start a streak today'}${
+          s.doneToday ? ' · done today ✓' : s.current ? ' · not yet today' : ''
         }</span>
       </div>
 
@@ -44,11 +44,11 @@ export function renderToday(root, { settings, active, previewDay, onPreview, onS
       ${
         active
           ? `<div class="card card-accent">
-              <h2>Rozpracovaný trénink</h2>
+              <h2>Workout in progress</h2>
               <p class="muted">${esc(active.session.title)}</p>
               <div class="row">
-                <button class="btn" data-act="discard">Zahodit</button>
-                <button class="btn btn-primary" data-act="resume">Pokračovat</button>
+                <button class="btn" data-act="discard">Discard</button>
+                <button class="btn btn-primary" data-act="resume">Resume</button>
               </div>
             </div>`
           : ''
@@ -70,10 +70,10 @@ export function renderToday(root, { settings, active, previewDay, onPreview, onS
           .join('')}
       </div>
 
-      ${settings.testMode ? '<p class="note">Testovací režim je zapnutý – časy jsou zkrácené a trénink se neuloží do historie (Nastavení).</p>' : ''}
+      ${settings.testMode ? '<p class="note">Test mode is on – times are shortened and the workout won’t be saved to history (Settings).</p>' : ''}
 
       <button class="btn btn-primary btn-start" data-act="start">Start · ~${session.minutes} min</button>
-      <button class="btn btn-ghost" data-act="abs">Jen ${absOnly.blocks[0].label.toLowerCase()} · ~${absOnly.minutes} min</button>
+      <button class="btn btn-ghost" data-act="abs">Only ${absOnly.blocks[0].label.toLowerCase()} · ~${absOnly.minutes} min</button>
     </div>`;
 
   root.onclick = (e) => {
