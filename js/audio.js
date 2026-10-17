@@ -1,4 +1,4 @@
-// Feedback: Web Audio beeps, vibration and Czech voice announcements.
+// Feedback: Web Audio beeps, vibration and English voice announcements.
 // All generated in code — no audio files.
 
 let ctx = null;
@@ -89,8 +89,8 @@ function pickVoice() {
   try {
     const vs = speechSynthesis.getVoices();
     voice =
-      vs.find((v) => v.lang === 'cs-CZ' || v.lang === 'cs_CZ') ||
-      vs.find((v) => v.lang?.toLowerCase().startsWith('cs')) ||
+      vs.find((v) => v.lang === 'en-US' || v.lang === 'en_US') ||
+      vs.find((v) => v.lang?.toLowerCase().startsWith('en')) ||
       null;
   } catch {
     voice = null;
@@ -107,7 +107,7 @@ export function speak(text) {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'cs-CZ';
+    u.lang = 'en-US';
     if (voice) u.voice = voice;
     u.rate = 1.05;
     speechSynthesis.speak(u);

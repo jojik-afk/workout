@@ -845,7 +845,7 @@ select {
 }
 
 .ex.is-current .ex-name::after {
-  content: 'moje úroveň';
+  content: 'my level';
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;

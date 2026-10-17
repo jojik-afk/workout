@@ -44,7 +44,7 @@ function mount() {
 }
 
 const routes = {
-  dnes() {
+  today() {
     renderToday(app, {
       settings,
       active: activeWorkout(),
@@ -65,13 +65,13 @@ const routes = {
       },
     });
   },
-  historie() {
+  history() {
     renderHistory(app);
   },
-  cviky() {
+  exercises() {
     renderLibrary(app);
   },
-  nastaveni() {
+  settings() {
     renderSettings(app, {
       settings,
       onChange(next) {
@@ -84,7 +84,7 @@ const routes = {
 
 function currentRoute() {
   const r = location.hash.slice(1);
-  return routes[r] ? r : 'dnes';
+  return routes[r] ? r : 'today';
 }
 
 function route() {
@@ -93,7 +93,7 @@ function route() {
   const y = window.scrollY;
   mount();
   routes[r]();
-  if (r === 'cviky' || r === 'nastaveni') window.scrollTo(0, y); // keep place when re-rendering after a change
+  if (r === 'exercises' || r === 'settings') window.scrollTo(0, y); // keep place when re-rendering after a change
   for (const a of nav.querySelectorAll('a')) a.setAttribute('aria-current', a.getAttribute('href') === `#${r}` ? 'page' : 'false');
 }
 
@@ -117,7 +117,7 @@ function openPlayer(session, restore) {
         onSettingsPatch: (patch) => updateSettings({ ...settings, ...patch }),
         onBack() {
           previewDay = null;
-          if (location.hash !== '#dnes') location.hash = '#dnes';
+          if (location.hash !== '#today') location.hash = '#today';
           else route();
         },
       });

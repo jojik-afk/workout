@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,10 +25,10 @@
 <body>
   <header>
     <h1>Pose preview</h1>
-    <input type="search" id="q" placeholder="Filtr (id, název, kategorie)">
-    <label class="toggle"><span>Pauza</span><input type="checkbox" id="pause"><span class="switch"></span></label>
+    <input type="search" id="q" placeholder="Filter (id, name, category)">
+    <label class="toggle"><span>Pause</span><input type="checkbox" id="pause"><span class="switch"></span></label>
   </header>
-  <p class="muted small">Pózy se upravují v <code>js/data/poses.js</code>, stačí obnovit stránku. Pruh dole ukazuje jednotlivé keyframy.</p>
+  <p class="muted small">Poses are edited in <code>js/data/poses.js</code>; just reload the page. The strip below shows the individual keyframes.</p>
   <div class="grid" id="grid"></div>
   <script type="module">
     import { EXERCISES } from '../js/data/exercises.js';
@@ -44,7 +44,7 @@
       cell.innerHTML = `<h2><span>${x.name}</span><small>${x.id} · ${x.category}</small></h2>`;
       grid.append(cell);
       if (!POSES[x.id]) {
-        cell.insertAdjacentHTML('beforeend', '<p class="missing">Chybí póza</p>');
+        cell.insertAdjacentHTML('beforeend', '<p class="missing">Missing pose</p>');
         continue;
       }
       figures.push(createFigure(cell, { id: x.id, controls: true }));
@@ -54,7 +54,7 @@
       cell.append(strip);
     }
     const missing = EXERCISES.filter((x) => !POSES[x.id]).length;
-    document.querySelector('h1').textContent = `Pose preview · ${EXERCISES.length} cviků${missing ? ` · ${missing} bez pózy` : ''}`;
+    document.querySelector('h1').textContent = `Pose preview · ${EXERCISES.length} exercises${missing ? ` · ${missing} without a pose` : ''}`;
 
     document.getElementById('q').addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();

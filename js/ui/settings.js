@@ -7,42 +7,42 @@ import { plural } from './util.js';
 import { canInstall, promptInstall, onInstallChange, isStandalone } from '../pwa.js';
 
 const STEPPERS = [
-  { key: 'work', label: 'Práce v kruhu', min: 30, max: 50, step: 5, unit: 's' },
-  { key: 'rest', label: 'Odpočinek v kruhu', min: 10, max: 30, step: 5, unit: 's' },
-  { key: 'setRest', label: 'Pauza mezi sériemi', min: 60, max: 120, step: 15, unit: 's' },
+  { key: 'work', label: 'Circuit work', min: 30, max: 50, step: 5, unit: 's' },
+  { key: 'rest', label: 'Circuit rest', min: 10, max: 30, step: 5, unit: 's' },
+  { key: 'setRest', label: 'Rest between sets', min: 60, max: 120, step: 15, unit: 's' },
 ];
 
 const TOGGLES = [
-  ['sound', 'Zvuk (pípání)'],
-  ['voice', 'Hlas (ohlášení cviků)'],
-  ['vibration', 'Vibrace'],
-  ['testMode', 'Testovací režim (zkrácené časy)'],
+  ['sound', 'Sound (beeps)'],
+  ['voice', 'Voice (exercise announcements)'],
+  ['vibration', 'Vibration'],
+  ['testMode', 'Test mode (shortened times)'],
 ];
 
 export function renderSettings(root, { settings, onChange }) {
   root.innerHTML = `
     <div class="screen">
-      <p class="eyebrow">Nastavení</p>
-      <h1 class="title">Nastavení</h1>
+      <p class="eyebrow">Settings</p>
+      <h1 class="title">Settings</h1>
 
       <div class="card">
-        <h2>Intervaly</h2>
+        <h2>Intervals</h2>
         ${STEPPERS.map(
           (s) => `
           <div class="setting-step">
             <span>${s.label}</span>
             <div class="mini-stepper">
-              <button class="btn" data-step="${s.key}" data-dir="-1" aria-label="Méně">−</button>
+              <button class="btn" data-step="${s.key}" data-dir="-1" aria-label="Less">−</button>
               <output>${settings[s.key]} ${s.unit}</output>
-              <button class="btn" data-step="${s.key}" data-dir="1" aria-label="Více">+</button>
+              <button class="btn" data-step="${s.key}" data-dir="1" aria-label="More">+</button>
             </div>
           </div>`,
         ).join('')}
-        <p class="muted small">Kruh na břicho nejvýš 50/10 s.</p>
+        <p class="muted small">Ab circuit at most 50/10 s.</p>
       </div>
 
       <div class="card">
-        <h2>Zvuk a vibrace</h2>
+        <h2>Sound and vibration</h2>
         ${TOGGLES.map(
           ([key, label]) => `
           <label class="toggle">
@@ -51,26 +51,26 @@ export function renderSettings(root, { settings, onChange }) {
             <span class="switch" aria-hidden="true"></span>
           </label>`,
         ).join('')}
-        <button class="btn" data-act="test">Vyzkoušet zvuk, hlas a vibrace</button>
+        <button class="btn" data-act="test">Test sound, voice and vibration</button>
       </div>
 
       <div class="card">
-        <h2>Aplikace</h2>
+        <h2>App</h2>
         ${
           isStandalone()
-            ? '<p class="muted small">Běží jako nainstalovaná aplikace a funguje i offline.</p>'
-            : `<button class="btn btn-primary" data-act="install" ${canInstall() ? '' : 'hidden'}>Nainstalovat na plochu</button>
-               <p class="muted small install-hint" ${canInstall() ? 'hidden' : ''}>Instalace: v Chromu menu ⋮ → <b>Přidat na plochu</b> / <b>Nainstalovat aplikaci</b>.</p>`
+            ? '<p class="muted small">Running as an installed app and works offline too.</p>'
+            : `<button class="btn btn-primary" data-act="install" ${canInstall() ? '' : 'hidden'}>Install to home screen</button>
+               <p class="muted small install-hint" ${canInstall() ? 'hidden' : ''}>To install: in Chrome, menu ⋮ → <b>Add to Home screen</b> / <b>Install app</b>.</p>`
         }
       </div>
 
       <div class="card">
         <h2>Data</h2>
-        <p class="muted small">Všechno je uložené jen v tomhle telefonu. Zálohu si občas stáhni (${getHistory().length} ${plural(getHistory().length, 'trénink', 'tréninky', 'tréninků')} v historii).</p>
-        <button class="btn" data-act="export">Stáhnout zálohu (JSON)</button>
-        <label class="btn file-btn">Obnovit ze zálohy…<input type="file" accept="application/json,.json" data-act="import" hidden></label>
+        <p class="muted small">Everything is stored only on this phone. Download a backup now and then (${getHistory().length} ${plural(getHistory().length, 'workout', 'workouts')} in history).</p>
+        <button class="btn" data-act="export">Download backup (JSON)</button>
+        <label class="btn file-btn">Restore from backup…<input type="file" accept="application/json,.json" data-act="import" hidden></label>
         <p class="data-msg small" role="status" hidden></p>
-        <button class="btn btn-danger-ghost" data-act="reset">Smazat všechna data</button>
+        <button class="btn btn-danger-ghost" data-act="reset">Delete all data</button>
       </div>
     </div>`;
 
@@ -97,10 +97,10 @@ export function renderSettings(root, { settings, onChange }) {
     }
     if (e.target.closest('[data-act="reset"]')) {
       confirmDialog({
-        title: 'Smazat všechna data?',
-        text: 'Smaže historii, úrovně i nastavení. Tohle nejde vrátit – nejdřív si stáhni zálohu.',
-        okText: 'Smazat',
-        cancelText: 'Zrušit',
+        title: 'Delete all data?',
+        text: 'Deletes history, levels and settings. This can’t be undone – download a backup first.',
+        okText: 'Delete',
+        cancelText: 'Cancel',
       }).then((ok) => {
         if (!ok) return;
         resetData();
@@ -114,7 +114,7 @@ export function renderSettings(root, { settings, onChange }) {
       setTimeout(() => audio.phaseStart('work'), 500);
       setTimeout(() => audio.phaseStart('rest'), 1200);
       audio.vibratePhase('work');
-      audio.speak('Další: Hanging knee raises');
+      audio.speak('Next: Hanging knee raises');
     }
   };
   const stop = onInstallChange((available) => {
@@ -140,7 +140,7 @@ function downloadBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `core-daily-zaloha-${dateKey()}.json`;
+  a.download = `core-daily-backup-${dateKey()}.json`;
   document.body.append(a);
   a.click();
   a.remove();
@@ -158,7 +158,7 @@ async function restoreBackup(file, root) {
   try {
     obj = JSON.parse(await file.text());
   } catch {
-    fail('Soubor se nepodařilo přečíst jako JSON.');
+    fail('The file could not be read as JSON.');
     return;
   }
   const err = validateBackup(obj);
@@ -167,12 +167,12 @@ async function restoreBackup(file, root) {
     return;
   }
   const n = obj.data.history?.length ?? 0;
-  const when = obj.exportedAt ? new Date(obj.exportedAt).toLocaleDateString('cs-CZ') : '?';
+  const when = obj.exportedAt ? new Date(obj.exportedAt).toLocaleDateString('en-GB') : '?';
   const ok = await confirmDialog({
-    title: 'Obnovit ze zálohy?',
-    text: `Záloha z ${when} (${n} ${plural(n, 'trénink', 'tréninky', 'tréninků')}) nahradí současná data v telefonu.`,
-    okText: 'Obnovit',
-    cancelText: 'Zrušit',
+    title: 'Restore from backup?',
+    text: `The backup from ${when} (${n} ${plural(n, 'workout', 'workouts')}) will replace the current data on this phone.`,
+    okText: 'Restore',
+    cancelText: 'Cancel',
   });
   if (!ok) return;
   importData(obj);

@@ -6,7 +6,7 @@
 // At least 2 sets below the range in two sessions in a row → easier variation.
 // Ab circuits: after ≥ 10 sessions and ≥ 14 days → swap one exercise for its
 // harder version, or extend intervals by 5 s (never beyond 50/10).
-// Feedback: two "Těžké" in a row hold all progression; two "Lehké" in a row
+// Feedback: two "Hard" in a row hold all progression; two "Easy" in a row
 // let it come sooner (one top session; 7 sessions / 10 days for ab circuits).
 
 import { get, set } from './storage.js';
@@ -128,8 +128,8 @@ function strengthSuggestion(exId, history, progress, mood, levels) {
         exId,
         ladder,
         toId: next.id,
-        title: `Přejít na ${next.name}`,
-        detail: `${ex.name}: horní hranice rozsahu ve všech sériích ${need === 1 ? 'v posledním tréninku' : 'dvakrát po sobě'}.`,
+        title: `Move up to ${next.name}`,
+        detail: `${ex.name}: top of the rep range on all sets ${need === 1 ? 'in the last workout' : 'twice in a row'}.`,
       };
     }
     const [lo, hi] = targetFor(exId);
@@ -137,8 +137,8 @@ function strengthSuggestion(exId, history, progress, mood, levels) {
       type: 'reps',
       exId,
       delta: REP_STEP,
-      title: `Zvýšit cíl na ${lo + REP_STEP}–${hi + REP_STEP} opakování`,
-      detail: `${ex.name}: horní hranice ve všech sériích${ex.progressesTo ? '' : ' a těžší varianta už není'}.`,
+      title: `Raise target to ${lo + REP_STEP}–${hi + REP_STEP} reps`,
+      detail: `${ex.name}: top of the range on all sets${ex.progressesTo ? '' : ' and there is no harder variation'}.`,
     };
   }
 
@@ -153,8 +153,8 @@ function strengthSuggestion(exId, history, progress, mood, levels) {
         exId,
         ladder,
         toId: prev.id,
-        title: `Ulehčit na ${prev.name}`,
-        detail: `${ex.name}: dvakrát po sobě pod spodní hranicí rozsahu.`,
+        title: `Step down to ${prev.name}`,
+        detail: `${ex.name}: below the bottom of the rep range twice in a row.`,
       };
     }
     if ((progress.repBoost[exId] ?? 0) > 0) {
@@ -163,8 +163,8 @@ function strengthSuggestion(exId, history, progress, mood, levels) {
         type: 'reps',
         exId,
         delta: -REP_STEP,
-        title: `Snížit cíl na ${lo - REP_STEP}–${hi - REP_STEP} opakování`,
-        detail: `${ex.name}: dvakrát po sobě pod spodní hranicí rozsahu.`,
+        title: `Lower target to ${lo - REP_STEP}–${hi - REP_STEP} reps`,
+        detail: `${ex.name}: below the bottom of the rep range twice in a row.`,
       };
     }
   }
@@ -213,8 +213,8 @@ function absSuggestion(history, progress, mood, settings, levels) {
     return {
       type: 'abs-swap',
       ...swap,
-      title: `Vyměnit ${byId[swap.exId].name} → ${byId[swap.toId].name}`,
-      detail: `Kruhy na břicho: ${n} tréninků za posledních ${Math.round(days)} dní.`,
+      title: `Swap ${byId[swap.exId].name} → ${byId[swap.toId].name}`,
+      detail: `Ab circuits: ${n} workouts in the last ${Math.round(days)} days.`,
     };
   }
   if (canExtend) {
@@ -224,8 +224,8 @@ function absSuggestion(history, progress, mood, settings, levels) {
       type: 'abs-interval',
       work,
       rest,
-      title: `Prodloužit kruhy na ${work}/${rest} s`,
-      detail: `Kruhy na břicho: ${n} tréninků za posledních ${Math.round(days)} dní.`,
+      title: `Extend circuits to ${work}/${rest} s`,
+      detail: `Ab circuits: ${n} workouts in the last ${Math.round(days)} days.`,
     };
   }
   return null;

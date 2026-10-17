@@ -2,12 +2,12 @@
 // Registered as a module worker (see js/pwa.js) so it can read the photo list.
 //
 // Bump VERSION whenever you deploy a change — the new version is downloaded in
-// the background and the app offers "Nová verze – obnovit".
+// the background and the app offers "New version – Reload".
 // `node tools/check-precache.mjs` verifies APP_FILES lists every app file.
 
 import { PHOTOS } from './js/data/photoMap.js';
 
-const VERSION = 1;
+const VERSION = 2;
 const CACHE = `core-daily-v${VERSION}`;
 
 const APP_FILES = [

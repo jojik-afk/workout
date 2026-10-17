@@ -1,4 +1,4 @@
-// Summary after a workout: stats, "Jak to šlo?" feedback, progression suggestions.
+// Summary after a workout: stats, "How did it go?" feedback, progression suggestions.
 // Test-mode sessions are not saved, so they get neither feedback nor suggestions.
 
 import { esc, plural } from './util.js';
@@ -6,9 +6,9 @@ import { updateSession, getHistory } from '../records.js';
 import { evaluate, apply, decline } from '../progression.js';
 
 const FEEDBACK = [
-  ['easy', 'Lehké'],
-  ['ok', 'Akorát'],
-  ['hard', 'Těžké'],
+  ['easy', 'Easy'],
+  ['ok', 'Just right'],
+  ['hard', 'Hard'],
 ];
 
 function fmtDuration(ms) {
@@ -29,16 +29,16 @@ export function renderSummary(root, result, { settings, onSettingsPatch, onBack 
     if (!feedback || !evaluation) return '';
     const { suggestions, hold, early } = evaluation;
     const note = hold
-      ? '<p class="muted small">Dvakrát po sobě „Těžké“ – progrese se teď drží. Dej si čas.</p>'
+      ? '<p class="muted small">Two “Hard” in a row – progression is on hold for now. Take your time.</p>'
       : early
-        ? '<p class="muted small">Dvakrát po sobě „Lehké“ – další krok může přijít dřív.</p>'
+        ? '<p class="muted small">Two “Easy” in a row – the next step may come sooner.</p>'
         : '';
     if (!suggestions.length) {
-      return `<div class="card"><h2>Progrese</h2>${note}<p class="muted small">Bez změn – pokračuj podle plánu.</p></div>`;
+      return `<div class="card"><h2>Progression</h2>${note}<p class="muted small">No changes – keep following the plan.</p></div>`;
     }
     return `
       <div class="card">
-        <h2>Návrh na progresi</h2>
+        <h2>Suggested progression</h2>
         ${note}
         ${suggestions
           .map((sg, i) => {
@@ -49,10 +49,10 @@ export function renderSummary(root, result, { settings, onSettingsPatch, onBack 
               <p class="muted small">${esc(sg.detail)}</p>
               ${
                 state
-                  ? `<p class="small sg-state">${state === 'applied' ? '✓ Uloženo – projeví se v dalším tréninku.' : 'Dobře, zatím beze změny.'}</p>`
+                  ? `<p class="small sg-state">${state === 'applied' ? '✓ Saved – takes effect in your next workout.' : 'OK, no change for now.'}</p>`
                   : `<div class="row">
-                      <button class="btn" data-decline="${i}">Teď ne</button>
-                      <button class="btn btn-primary" data-apply="${i}">Přijmout</button>
+                      <button class="btn" data-decline="${i}">Not now</button>
+                      <button class="btn btn-primary" data-apply="${i}">Accept</button>
                     </div>`
               }
             </div>`;
@@ -65,21 +65,21 @@ export function renderSummary(root, result, { settings, onSettingsPatch, onBack 
     root.innerHTML = `
       <div class="screen">
         <p class="eyebrow">${esc(result.title)}</p>
-        <h1 class="title">${result.early ? 'Trénink ukončen' : 'Hotovo!'}</h1>
+        <h1 class="title">${result.early ? 'Workout ended' : 'Done!'}</h1>
 
         <div class="stats">
-          <div class="stat"><span class="stat-num">${fmtDuration(result.activeMs)}</span><span class="stat-label">čas</span></div>
-          <div class="stat"><span class="stat-num">${result.done.length}</span><span class="stat-label">${plural(result.done.length, 'cvik', 'cviky', 'cviků')}</span></div>
-          <div class="stat"><span class="stat-num">${totalReps}</span><span class="stat-label">opakování</span></div>
+          <div class="stat"><span class="stat-num">${fmtDuration(result.activeMs)}</span><span class="stat-label">time</span></div>
+          <div class="stat"><span class="stat-num">${result.done.length}</span><span class="stat-label">${plural(result.done.length, 'exercise', 'exercises')}</span></div>
+          <div class="stat"><span class="stat-num">${totalReps}</span><span class="stat-label">reps</span></div>
         </div>
 
         ${
           sets.length
-            ? `<div class="card"><h2>Série</h2><ul class="list">
+            ? `<div class="card"><h2>Sets</h2><ul class="list">
                 ${sets
                   .map(
                     (d) =>
-                      `<li><span>${esc(d.name)} · ${d.set[0]}. série${d.target ? ` <span class="muted">(${d.target[0]}–${d.target[1]})</span>` : ''}</span><b>${d.reps}</b></li>`,
+                      `<li><span>${esc(d.name)} · set ${d.set[0]}${d.target ? ` <span class="muted">(${d.target[0]}–${d.target[1]})</span>` : ''}</span><b>${d.reps}</b></li>`,
                   )
                   .join('')}
               </ul></div>`
@@ -89,7 +89,7 @@ export function renderSummary(root, result, { settings, onSettingsPatch, onBack 
         ${
           entry
             ? `<div class="card">
-                <h2>Jak to šlo?</h2>
+                <h2>How did it go?</h2>
                 <div class="segmented seg-3" role="radiogroup">
                   ${FEEDBACK.map(([k, label]) => `<button role="radio" data-feedback="${k}" aria-checked="${feedback === k}">${label}</button>`).join('')}
                 </div>
@@ -101,11 +101,11 @@ export function renderSummary(root, result, { settings, onSettingsPatch, onBack 
 
         ${
           entry
-            ? `<p class="muted small center">Uloženo do historie${result.streak ? ` · streak ${result.streak} ${plural(result.streak, 'den', 'dny', 'dní')} 🔥` : ''}</p>`
-            : `<p class="muted small center">${result.test ? 'Testovací režim – do historie se neukládá.' : 'Nic nebylo odcvičeno, do historie se neukládá.'}</p>`
+            ? `<p class="muted small center">Saved to history${result.streak ? ` · streak ${result.streak} ${plural(result.streak, 'day', 'days')} 🔥` : ''}</p>`
+            : `<p class="muted small center">${result.test ? 'Test mode – not saved to history.' : 'Nothing was completed, not saved to history.'}</p>`
         }
 
-        <button class="btn btn-primary btn-start" data-act="back">Zpět</button>
+        <button class="btn btn-primary btn-start" data-act="back">Back</button>
       </div>`;
   }
 

@@ -8,7 +8,7 @@ const M = { top: 12, right: 12, bottom: 22, left: 28 };
 
 const fmtDate = (k) => {
   const [, m, d] = k.split('-').map(Number);
-  return `${d}. ${m}.`;
+  return `${d}/${m}`;
 };
 
 function niceMax(v) {
@@ -18,7 +18,7 @@ function niceMax(v) {
 }
 
 // points: [{ date: 'YYYY-MM-DD', best: number }] sorted by date
-export function lineChart(container, points, { unit = 'opak.' } = {}) {
+export function lineChart(container, points, { unit = 'reps' } = {}) {
   const max = niceMax(Math.max(...points.map((p) => p.best)));
   const iw = W - M.left - M.right;
   const ih = H - M.top - M.bottom;
@@ -29,7 +29,7 @@ export function lineChart(container, points, { unit = 'opak.' } = {}) {
   container.innerHTML = `
     <div class="chart-readout" aria-live="polite"></div>
     <svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
-      aria-label="Nejlepší série v čase, posledně ${points.at(-1).best} ${unit}">
+      aria-label="Best set over time, latest ${points.at(-1).best} ${unit}">
       ${ticks
         .map(
           (t) => `<line class="chart-grid" x1="${M.left}" x2="${W - M.right}" y1="${y(t)}" y2="${y(t)}"/>
@@ -59,7 +59,7 @@ export function lineChart(container, points, { unit = 'opak.' } = {}) {
   const reset = () => {
     const last = points.at(-1);
     const best = Math.max(...points.map((p) => p.best));
-    readout.textContent = `Posledně ${last.best} · rekord ${best} ${unit}`;
+    readout.textContent = `Latest ${last.best} · record ${best} ${unit}`;
     cross.setAttribute('visibility', 'hidden');
     dots.forEach((d) => d.classList.remove('is-active'));
   };

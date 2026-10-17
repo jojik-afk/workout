@@ -82,10 +82,10 @@ function showUpdateBanner(activate, isBusy) {
   if (document.querySelector('.update-banner')) return;
   const bar = document.createElement('div');
   bar.className = 'update-banner';
-  bar.innerHTML = '<span>Nová verze aplikace</span><button class="btn btn-primary">Obnovit</button>';
+  bar.innerHTML = '<span>New app version</span><button class="btn btn-primary">Reload</button>';
   bar.querySelector('button').addEventListener('click', () => {
     if (isBusy()) {
-      bar.querySelector('span').textContent = 'Obnovím po dokončení tréninku';
+      bar.querySelector('span').textContent = 'Will reload after the workout';
       return;
     }
     bar.remove();

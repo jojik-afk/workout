@@ -7,10 +7,10 @@ import { get, set, remove } from '../storage.js';
 import { confirmDialog } from './dialog.js';
 import { createFigure } from './figure.js';
 
-const LABELS = { prep: 'Připrav se', warmup: 'Rozcvička', work: 'Cvičení', rest: 'Odpočinek', reps: 'Série' };
+const LABELS = { prep: 'Get ready', warmup: 'Warm-up', work: 'Work', rest: 'Rest', reps: 'Set' };
 const RING_C = 2 * Math.PI * 92;
 const HANGING_NOTE =
-  'Na hrazdě: přestaň, jakmile ti začne povolovat úchop. Nikdy se nepouštěj nekontrolovaně.';
+  'On the bar: stop as soon as your grip starts to fail. Never let go uncontrolled.';
 
 const ICON = {
   close: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -23,12 +23,12 @@ const ICON = {
 const TEMPLATE = `
 <div class="player" data-kind="prep">
   <header class="p-top">
-    <button class="icon-btn" data-act="end" aria-label="Ukončit trénink">${ICON.close}</button>
+    <button class="icon-btn" data-act="end" aria-label="End workout">${ICON.close}</button>
     <div class="p-phase"></div>
     <div class="p-count"></div>
   </header>
   <div class="p-progress"><div class="p-progress-fill"></div></div>
-  <p class="p-wl" hidden>Displej může zhasnout (wake lock potřebuje HTTPS nebo localhost).</p>
+  <p class="p-wl" hidden>The screen may turn off (wake lock needs HTTPS or localhost).</p>
   <main class="p-main" data-act="tap">
     <div class="p-ring">
       <svg viewBox="0 0 200 200" aria-hidden="true">
@@ -36,38 +36,38 @@ const TEMPLATE = `
         <circle class="ring-fg" cx="100" cy="100" r="92"/>
       </svg>
       <div class="p-time" aria-live="off"></div>
-      <div class="p-paused">Pauza</div>
+      <div class="p-paused">Paused</div>
     </div>
     <div class="p-reps" hidden>
       <div class="p-target"></div>
       <div class="stepper">
-        <button class="step-btn" data-act="minus" aria-label="Méně">−</button>
+        <button class="step-btn" data-act="minus" aria-label="Fewer">−</button>
         <output class="p-repval">0</output>
-        <button class="step-btn" data-act="plus" aria-label="Více">+</button>
+        <button class="step-btn" data-act="plus" aria-label="More">+</button>
       </div>
-      <button class="btn btn-primary btn-big" data-act="done">Hotovo</button>
+      <button class="btn btn-primary btn-big" data-act="done">Done</button>
     </div>
     <div class="p-figure"></div>
     <div class="p-log" data-act="noop" hidden>
       <span class="p-log-label"></span>
       <div class="p-log-ctrl">
-        <button class="log-btn" data-act="log-minus" aria-label="Méně">−</button>
+        <button class="log-btn" data-act="log-minus" aria-label="Fewer">−</button>
         <output class="p-log-val">0</output>
-        <button class="log-btn" data-act="log-plus" aria-label="Více">+</button>
-        <button class="log-btn log-ok" data-act="log-ok" aria-label="Zapsat">✓</button>
+        <button class="log-btn" data-act="log-plus" aria-label="More">+</button>
+        <button class="log-btn log-ok" data-act="log-ok" aria-label="Log">✓</button>
       </div>
     </div>
     <div class="p-info">
-      <div class="p-next-label" hidden>Další:</div>
+      <div class="p-next-label" hidden>Next:</div>
       <h1 class="p-name"></h1>
       <p class="p-cue"></p>
       <p class="p-safety" hidden></p>
     </div>
   </main>
   <footer class="p-controls">
-    <button class="ctrl-btn" data-act="back" aria-label="Zpět">${ICON.back}</button>
-    <button class="ctrl-btn ctrl-main" data-act="pause" aria-label="Pauza">${ICON.pause}</button>
-    <button class="ctrl-btn" data-act="skip" aria-label="Přeskočit">${ICON.skip}</button>
+    <button class="ctrl-btn" data-act="back" aria-label="Back">${ICON.back}</button>
+    <button class="ctrl-btn ctrl-main" data-act="pause" aria-label="Pause">${ICON.pause}</button>
+    <button class="ctrl-btn" data-act="skip" aria-label="Skip">${ICON.skip}</button>
   </footer>
 </div>`;
 
@@ -77,9 +77,9 @@ function fmt(sec) {
 }
 
 function counterText(p) {
-  if (p.block === 'strength' && p.set) return `Série ${p.set[0]} / ${p.set[1]}`;
+  if (p.block === 'strength' && p.set) return `Set ${p.set[0]} / ${p.set[1]}`;
   if (p.counter) {
-    const round = p.round && p.round[1] > 1 ? `Kolo ${p.round[0]}/${p.round[1]} · ` : '';
+    const round = p.round && p.round[1] > 1 ? `Round ${p.round[0]}/${p.round[1]} · ` : '';
     return `${round}${p.counter[0]} / ${p.counter[1]}`;
   }
   return '';
@@ -132,10 +132,10 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
 
   function announce(p) {
     const name = p.exercise.name;
-    if (p.kind === 'prep') audio.speak(`Připrav se. První: ${name}`);
-    else if (p.kind === 'rest' && p.block === 'strength' && p.set) audio.speak(`Pauza. Další série: ${name}`);
-    else if (p.kind === 'rest') audio.speak(`Další: ${name}`);
-    else if (p.kind === 'reps') audio.speak(`${name}. Série ${p.set[0]} ze ${p.set[1]}`);
+    if (p.kind === 'prep') audio.speak(`Get ready. First: ${name}`);
+    else if (p.kind === 'rest' && p.block === 'strength' && p.set) audio.speak(`Rest. Next set: ${name}`);
+    else if (p.kind === 'rest') audio.speak(`Next: ${name}`);
+    else if (p.kind === 'reps') audio.speak(`${name}. Set ${p.set[0]} of ${p.set[1]}`);
     else if (p.kind === 'warmup') audio.speak(name);
   }
 
@@ -156,7 +156,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     ui.nextLabel.hidden = !(p.kind === 'rest' || p.kind === 'prep');
     ui.name.textContent = p.exercise.name;
     figure.setExercise(p.exercise.id);
-    ui.cue.textContent = p.exercise.czCue;
+    ui.cue.textContent = p.exercise.cue;
     ui.safety.hidden = !p.exercise.hanging;
 
     setupLog(p, index);
@@ -164,8 +164,8 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     ui.ring.hidden = isReps;
     ui.reps.hidden = !isReps;
     if (isReps) {
-      const per = p.exercise.perSide ? ' na každou stranu' : '';
-      ui.target.textContent = `Cíl: ${p.target[0]}–${p.target[1]} opakování${per}`;
+      const per = p.exercise.perSide ? ' per side' : '';
+      ui.target.textContent = `Target: ${p.target[0]}–${p.target[1]} reps${per}`;
       setReps(prefill(p, index));
     }
     lastText = '';
@@ -187,7 +187,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     remove('active');
     audio.finish();
     audio.vibrateEnd();
-    if (!result.early) audio.speak('Hotovo. Skvělá práce!');
+    if (!result.early) audio.speak('Done. Great job!');
     onFinish({ ...result, title: session.title });
   }
 
@@ -199,7 +199,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     if (logIndex < 0) return;
     const last = get('lastReps', {})?.[prev.exercise.id];
     logValue = done.reps ?? (Number.isFinite(last) ? last : 8);
-    ui.logLabel.textContent = `${prev.exercise.name}: kolik opakování?`;
+    ui.logLabel.textContent = `${prev.exercise.name}: how many reps?`;
     ui.logVal.textContent = logValue;
     ui.log.classList.toggle('is-logged', done.reps != null);
   }
@@ -245,10 +245,10 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
     const wasPaused = timer.status === 'paused';
     timer.pause();
     const ok = await confirmDialog({
-      title: 'Ukončit trénink?',
-      text: 'Uvidíš souhrn odcvičené části.',
-      okText: 'Ukončit',
-      cancelText: 'Pokračovat',
+      title: 'End workout?',
+      text: 'You’ll see a summary of what you did.',
+      okText: 'End',
+      cancelText: 'Continue',
     });
     ending = false;
     if (ok) timer.finish(true);
@@ -266,7 +266,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
       el.classList.toggle('is-paused', paused);
       figure.setPlaying(!paused);
       ui.pauseBtn.innerHTML = paused ? ICON.play : ICON.pause;
-      ui.pauseBtn.setAttribute('aria-label', paused ? 'Pokračovat' : 'Pauza');
+      ui.pauseBtn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
     }
 
     if (p.duration != null) {
@@ -277,7 +277,7 @@ export function startPlayer(root, session, { restore = null, onFinish }) {
         if (p.duration / 2 - rem < 1) {
           audio.phaseStart('work');
           audio.vibratePhase('work');
-          audio.speak('Druhá strana');
+          audio.speak('Switch sides');
         }
       }
       ui.ringFg.style.strokeDashoffset = RING_C * (1 - rem / p.duration);
